@@ -1,11 +1,8 @@
-// ESM formatında düzgün çalışan versiyon
 import fetch from 'node-fetch';
 
-export const config = {
-  runtime: 'edge', // Vercel Edge Functions için
-};
+export const dynamic = 'force-dynamic'; // Önbellekleme önleme
 
-export default async function handler(request) {
+export async function GET() {
   const url = "https://core-api.kablowebtv.com/api/channels";
   const headers = {
     "User-Agent": "Mozilla/5.0",
@@ -16,7 +13,6 @@ export default async function handler(request) {
   };
 
   try {
-    // API'den veri çekme
     const response = await fetch(url, { headers });
     
     if (!response.ok) {
@@ -25,20 +21,10 @@ export default async function handler(request) {
       return new Response(JSON.stringify({
         error: "Kanal verileri alınamadı",
         details: errorData
-      }), {
-        status: response.status,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      }), { status: response.status, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Yanıtı işleme
-    const buffer = await response.arrayBuffer();
-    const text = Buffer.from(buffer).toString("utf-8");
-    const data = JSON.parse(text);
-
-    // M3U formatını oluşturma
+    const data = await response.json();
     let m3uContent = "#EXTM3U\n";
     const excludedCategories = ["Bilgilendirme", "Test"];
     
@@ -54,7 +40,6 @@ export default async function handler(request) {
       m3uContent += `#EXTINF:-1 tvg-logo="${PrimaryLogoImageUrl}" group-title="${category}",${Name}\n${hlsUrl}\n`;
     });
 
-    // Yanıtı gönderme
     return new Response(m3uContent, {
       status: 200,
       headers: {
@@ -68,11 +53,6 @@ export default async function handler(request) {
     return new Response(JSON.stringify({
       error: "Sunucu hatası",
       message: error.message
-    }), {
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    }), { status: 500 });
   }
 }
