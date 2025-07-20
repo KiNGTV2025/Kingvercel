@@ -1,5 +1,10 @@
 {
+  "functions": {
+    "api/m3u.py": {
+      "runtime": "python3.9"
+    }
+  },
   "rewrites": [
-    { "source": "/m3u", "destination": "/api/m3u.py" }
+    { "source": "/m3u", "destination": "/api/m3u" }
   ]
 }
