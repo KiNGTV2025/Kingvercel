@@ -1,0 +1,35 @@
+name: Günlük M3U Güncellemesi
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Python kurulumu
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+
+    - name: Gereksinimler
+      run: pip install requests
+
+    - name: Ortam değişkeni
+      run: echo "CANLITV_TOKEN=${{ secrets.CANLITV_TOKEN }}" >> $GITHUB_ENV
+
+    - name: M3U oluştur
+      run: python generate_m3u.py
+
+    - name: Commit & Push
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add M3UARŞİV/Kablonet.m3u
+        git commit -m "🔄 Otomatik M3U Güncellemesi"
+        git push
