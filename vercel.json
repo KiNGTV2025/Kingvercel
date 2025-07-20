@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/m3u.py": {
-      "runtime": "now-python@1.0.0"
-    }
-  },
   "rewrites": [
     { "source": "/m3u", "destination": "/api/m3u.py" }
   ]
