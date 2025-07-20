@@ -27,7 +27,6 @@ def get_canli_tv_m3u():
 
     with open("M3UARŞİV/Kablonet.m3u", "w", encoding="utf-8") as f:
         f.write("#EXTM3U\n")
-        channel_id = 1  # Start with ID 1
         for channel in channels:
             name = channel.get('Name')
             stream_data = channel.get('StreamData', {})
@@ -42,9 +41,8 @@ def get_canli_tv_m3u():
             if group == "Bilgilendirme":
                 continue
 
-            f.write(f'#EXTINF:-1 tvg-id="{channel_id}" tvg-logo="{logo}" group-title="{group}",{name}\n')
+            f.write(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group}",{name}\n')
             f.write(f'{hls_url}\n')
-            channel_id += 1  # Increment ID for next channel
 
 if __name__ == "__main__":
     get_canli_tv_m3u()
