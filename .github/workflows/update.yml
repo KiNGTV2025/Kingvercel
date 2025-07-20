@@ -1,35 +1,36 @@
-name: M3U Otomatik Güncelleme
+name: Amk çalış artık
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
-  workflow_dispatch:
+    - cron: "0 */6 * * *"  # Her 6 saatte bir çalışır
+  workflow_dispatch:       # Manuel çalıştırma desteği
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Repo'yu klonla
+      - name: Repo klonla
         uses: actions/checkout@v3
 
       - name: Python kurulumu
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
-      - name: Gereksinimleri yükle
+      - name: Gerekli kütüphaneleri yükle
         run: pip install requests
 
-      - name: M3U dosyasını üret
+      - name: M3U dosyasını oluştur
         run: python generate_m3u.py
 
-      - name: Değişiklikleri commit et ve pushla
+      - name: Değişiklikleri push et
         env:
-          TOKEN: ${{ secrets.GH_PAT }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config --global user.name "AutoUpdater"
-          git config --global user.email "bot@example.com"
-          git remote set-url origin https://x-access-token:${TOKEN}@github.com/${{ github.repository }}
+          git config --global user.email "auto@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}
           git add .
-          git commit -m "🔄 Otomatik M3U güncellemesi" || echo "No changes to commit"
-          git push
+          git commit -m "🔄 Otomatik M3U güncellemesi" || echo "Değişiklik yok"
+          git push origin HEAD:main
