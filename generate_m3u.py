@@ -23,9 +23,9 @@ def get_canli_tv_m3u():
 
     data = json.loads(content)
     channels = data['Data']['AllChannels']
-    os.makedirs("M3UARŞİV", exist_ok=True)
+    os.makedirs("M3U", exist_ok=True)
 
-    with open("M3UARŞİV/Kablonet.m3u", "w", encoding="utf-8") as f:
+    with open("M3U/Kablonet.m3u", "w", encoding="utf-8") as f:
         f.write("#EXTM3U\n")
         channel_id = 1  # Start with ID 1
         for channel in channels:
