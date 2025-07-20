@@ -10,7 +10,7 @@ def handler(request):
         "Referer": "https://tvheryerde.com",
         "Origin": "https://tvheryerde.com",
         "Accept-Encoding": "gzip",
-        "Authorization": f"Bearer {{YOUR_TOKEN_HERE}}"
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbnYiOiJMSVZFIiwiaXBiIjoiMCIsImNnZCI6IjA5M2Q3MjBhLTUwMmMtNDFlZC1hODBmLTJiODE2OTg0ZmI5NSIsImNzaCI6IlRSS1NUIiwiZGN0IjoiM0VGNzUiLCJkaSI6ImE2OTliODNmLTgyNmItNGQ5OS05MzYxLWM4YTMxMzIxOGQ0NiIsInNnZCI6Ijg5NzQxZmVjLTFkMzMtNGMwMC1hZmNkLTNmZGFmZTBiNmEyZCIsInNwZ2QiOiIxNTJiZDUzOS02MjIwLTQ0MjctYTkxNS1iZjRiZDA2OGQ3ZTgiLCJpY2giOiIwIiwiaWRtIjoiMCIsImlhIjoiOjpmZmZmOjEwLjAuMC4yMDYiLCJhcHYiOiIxLjAuMCIsImFibiI6IjEwMDAiLCJuYmYiOjE3NDUxNTI4MjUsImV4cCI6MTc0NTE1Mjg4NSwiaWF0IjoxNzQ1MTUyODI1fQ.OSlafRMxef4EjHG5t6TqfAQC7y05IiQjwwgf6yMUS9E"
     }
 
     try:
@@ -41,9 +41,17 @@ def handler(request):
             if group == "Bilgilendirme":
                 continue
 
-            m3u += f'#EXTINF:-1 tvg-logo="{{logo}}" group-title="{{group}}",{{name}}\n{{hls_url}}\n'
+            m3u += f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group}",{name}\n{hls_url}\n'
 
-        return (200, {"Content-Type": "application/x-mpegURL"}, m3u)
+        return {
+            "statusCode": 200,
+            "headers": { "Content-Type": "application/x-mpegURL" },
+            "body": m3u
+        }
 
     except Exception as e:
-        return (500, {}, f"Hata oluştu: {{str(e)}}")
+        return {
+            "statusCode": 500,
+            "headers": { "Content-Type": "text/plain" },
+            "body": f"Hata oluştu: {str(e)}"
+        }
