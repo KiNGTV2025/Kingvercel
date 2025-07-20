@@ -1,6 +1,11 @@
-import fetch from "node-fetch";
+// ESM formatında düzgün çalışan versiyon
+import fetch from 'node-fetch';
 
-export default async function handler(req, res) {
+export const config = {
+  runtime: 'edge', // Vercel Edge Functions için
+};
+
+export default async function handler(request) {
   const url = "https://core-api.kablowebtv.com/api/channels";
   const headers = {
     "User-Agent": "Mozilla/5.0",
@@ -17,9 +22,14 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorData = await response.text();
       console.error(`API Hatası: ${response.status} - ${errorData}`);
-      return res.status(response.status).json({
+      return new Response(JSON.stringify({
         error: "Kanal verileri alınamadı",
         details: errorData
+      }), {
+        status: response.status,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
     }
 
@@ -45,15 +55,24 @@ export default async function handler(req, res) {
     });
 
     // Yanıtı gönderme
-    res.setHeader("Content-Type", "application/x-mpegURL");
-    res.setHeader("Cache-Control", "public, max-age=3600"); // 1 saat önbellek
-    return res.status(200).send(m3uContent);
+    return new Response(m3uContent, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/x-mpegURL',
+        'Cache-Control': 'public, max-age=3600'
+      }
+    });
 
   } catch (error) {
     console.error("Beklenmeyen Hata:", error);
-    return res.status(500).json({
+    return new Response(JSON.stringify({
       error: "Sunucu hatası",
       message: error.message
+    }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
   }
 }
