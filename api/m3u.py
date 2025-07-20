@@ -43,15 +43,7 @@ def handler(request):
 
             m3u += f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group}",{name}\n{hls_url}\n'
 
-        return {
-            "statusCode": 200,
-            "headers": { "Content-Type": "application/x-mpegURL" },
-            "body": m3u
-        }
+        return (200, {"Content-Type": "application/x-mpegURL"}, m3u)
 
     except Exception as e:
-        return {
-            "statusCode": 500,
-            "headers": { "Content-Type": "text/plain" },
-            "body": f"Hata oluştu: {str(e)}"
-        }
+        return (500, {"Content-Type": "text/plain"}, f"Hata oluştu: {str(e)}")
