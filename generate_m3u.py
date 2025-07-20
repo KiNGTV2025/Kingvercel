@@ -9,9 +9,10 @@ def get_canli_tv_m3u():
         "Referer": "https://tvheryerde.com",
         "Origin": "https://tvheryerde.com",
         "Accept-Encoding": "gzip",
-        "Authorization": f"Bearer {{os.environ['CANLITV_TOKEN']}}"
+        "Authorization": os.environ["CANLITV_TOKEN"]
     }
 
+    print("📡 API'ye istek gönderiliyor...")
     response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
 
@@ -22,9 +23,15 @@ def get_canli_tv_m3u():
         content = response.content.decode('utf-8')
 
     data = json.loads(content)
-    channels = data['Data']['AllChannels']
-    os.makedirs("M3UARŞİV", exist_ok=True)
 
+    if not data.get('IsSucceeded') or not data.get('Data', {}).get('AllChannels'):
+        print("❌ API'den geçerli veri alınamadı!")
+        return
+
+    channels = data['Data']['AllChannels']
+    print(f"✅ {len(channels)} kanal bulundu")
+
+    os.makedirs("M3UARŞİV", exist_ok=True)
     with open("M3UARŞİV/Kablonet.m3u", "w", encoding="utf-8") as f:
         f.write("#EXTM3U\n")
         for channel in channels:
@@ -41,8 +48,10 @@ def get_canli_tv_m3u():
             if group == "Bilgilendirme":
                 continue
 
-            f.write(f'#EXTINF:-1 tvg-logo="{{logo}}" group-title="{{group}}",{{name}}\n')
-            f.write(f'{{hls_url}}\n')
+            f.write(f'#EXTINF:-1 tvg-logo="{logo}" group-title="{group}",{name}\n')
+            f.write(f'{hls_url}\n')
+
+    print("📁 Kablonet.m3u oluşturuldu!")
 
 if __name__ == "__main__":
     get_canli_tv_m3u()
