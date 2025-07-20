@@ -1,15 +1,6 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/m3u.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/m3u",
-      "dest": "/api/m3u"
-    }
+  "version": 3,
+  "rewrites": [
+    { "source": "/m3u", "destination": "/api/m3u" }
   ]
 }
