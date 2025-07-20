@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "rewrites": [
-    { "source": "/m3u", "destination": "/api/m3u" }
+  "routes": [
+    { "src": "/m3u", "dest": "/api/m3u" }
   ]
 }
