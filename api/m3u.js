@@ -11,48 +11,49 @@ export default async function handler(req, res) {
   };
 
   try {
+    // API'den veri çekme
     const response = await fetch(url, { headers });
-
+    
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      const errorData = await response.text();
+      console.error(`API Hatası: ${response.status} - ${errorData}`);
+      return res.status(response.status).json({
+        error: "Kanal verileri alınamadı",
+        details: errorData
+      });
     }
 
+    // Yanıtı işleme
     const buffer = await response.arrayBuffer();
-    const contentEncoding = response.headers.get("content-encoding");
-
-    let text;
-    if (contentEncoding && contentEncoding.includes("gzip")) {
-      // Genelde Vercel otomatik açıyor ama eğer açmazsa buraya gzip açma kodu eklenmeli
-      text = Buffer.from(buffer).toString("utf-8");
-    } else {
-      text = Buffer.from(buffer).toString("utf-8");
-    }
-
+    const text = Buffer.from(buffer).toString("utf-8");
     const data = JSON.parse(text);
-    const channels = data.Data.AllChannels;
 
-    let m3u = "#EXTM3U\n";
+    // M3U formatını oluşturma
+    let m3uContent = "#EXTM3U\n";
+    const excludedCategories = ["Bilgilendirme", "Test"];
+    
+    data.Data.AllChannels.forEach(channel => {
+      const { Name, StreamData = {}, PrimaryLogoImageUrl = "", Categories = [] } = channel;
+      const hlsUrl = StreamData.HlsStreamUrl;
+      
+      if (!Name || !hlsUrl) return;
+      
+      const category = Categories[0]?.Name || "Genel";
+      if (excludedCategories.includes(category)) return;
+      
+      m3uContent += `#EXTINF:-1 tvg-logo="${PrimaryLogoImageUrl}" group-title="${category}",${Name}\n${hlsUrl}\n`;
+    });
 
-    for (const channel of channels) {
-      const name = channel.Name;
-      const stream_data = channel.StreamData || {};
-      const hls_url = stream_data.HlsStreamUrl;
-      const logo = channel.PrimaryLogoImageUrl || "";
-      const categories = channel.Categories || [];
-
-      if (!name || !hls_url) continue;
-
-      const group = categories.length > 0 ? categories[0].Name || "Genel" : "Genel";
-      if (group === "Bilgilendirme") continue;
-
-      m3u += `#EXTINF:-1 tvg-logo="${logo}" group-title="${group}",${name}\n${hls_url}\n`;
-    }
-
+    // Yanıtı gönderme
     res.setHeader("Content-Type", "application/x-mpegURL");
-    res.status(200).send(m3u);
+    res.setHeader("Cache-Control", "public, max-age=3600"); // 1 saat önbellek
+    return res.status(200).send(m3uContent);
 
-  } catch (e) {
-    console.error("Hata:", e);
-    res.status(500).send(`Hata oluştu: ${e.message}`);
+  } catch (error) {
+    console.error("Beklenmeyen Hata:", error);
+    return res.status(500).json({
+      error: "Sunucu hatası",
+      message: error.message
+    });
   }
 }
