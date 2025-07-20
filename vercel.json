@@ -1,10 +1,15 @@
 {
-  "functions": {
-    "api/m3u.js": {
-      "runtime": "nodejs18.x"
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/m3u.js",
+      "use": "@vercel/node"
     }
-  },
-  "rewrites": [
-    { "source": "/m3u", "destination": "/api/m3u" }
+  ],
+  "routes": [
+    {
+      "src": "/m3u",
+      "dest": "/api/m3u"
+    }
   ]
 }
